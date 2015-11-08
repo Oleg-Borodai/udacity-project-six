@@ -28,16 +28,15 @@ $(function () {
             expect(allFeeds.length).not.toBe(0);
         });
 
-
         /* A test that loops through each feed
          * in the allFeeds object and ensures it has a URL defined
          * and that the URL is not empty.
          */
         it('have not empty URLs', function () {
-            for (var i = 0, len = allFeeds.length; i < len; i++) {
-                expect(allFeeds[i].url).toBeDefined();
-                expect(allFeeds[i].url).not.toBeNull();
-            }
+            allFeeds.forEach(function (feed) {
+                expect(feed.url).toBeDefined();
+                expect(feed.url).not.toBeNull();
+            });
         });
 
         /* A test that loops through each feed
@@ -45,75 +44,83 @@ $(function () {
          * and that the name is not empty.
          */
         it('have not empty names', function () {
-            for (var i = 0, len = allFeeds.length; i < len; i++) {
-                expect(allFeeds[i].name).toBeDefined();
-                expect(allFeeds[i].name).not.toBeNull();
-            }
+            allFeeds.forEach(function (feed) {
+                expect(feed.name).toBeDefined();
+                expect(feed.name).not.toBeNull();
+            });
         });
     });
 
-
-    /* A new test suite named "The menu" */
     describe('The menu', function () {
+
         /* A test that ensures the menu element is
          * hidden by default. You'll have to analyze the HTML and
          * the CSS to determine how we're performing the
          * hiding/showing of the menu element.
          */
-        it('has menu element hidden by default', function () {
-            expect($('body').hasClass('menu-hidden')).toBe(true);
+        beforeEach(function () {
+            this.menuIcon = $('.menu-icon-link');
+            this.body = $('body');
         });
-        /* TODO: Write a test that ensures the menu changes
+
+        it('has menu element hidden by default', function () {
+            expect(this.body.hasClass('menu-hidden')).toBeTruthy();
+        });
+
+        /* A test that ensures the menu changes
          * visibility when the menu icon is clicked. This test
          * should have two expectations: does the menu display when
          * clicked and does it hide when clicked again.
          */
         it('changes visibility when the menu icon is clicked', function () {
-            $('.menu-icon-link').trigger('click');
-            expect($('body').hasClass('menu-hidden')).toBe(false);
-            $('.menu-icon-link').trigger('click');
-            expect($('body').hasClass('menu-hidden')).toBe(true);
+            this.menuIcon.trigger('click');
+            expect(this.body.hasClass('menu-hidden')).toBeFalsy();
+            this.menuIcon.trigger('click');
+            expect(this.body.hasClass('menu-hidden')).toBeTruthy();
         });
     });
-    /* TODO: Write a new test suite named "Initial Entries" */
-    describe('Initial Entries', function () {
 
-        /* TODO: Write a test that ensures when the loadFeed
+    describe('Initial Entries', function () {
+        var self;
+        /* A test that ensures when the loadFeed
          * function is called and completes its work, there is at least
          * a single .entry element within the .feed container.
          * Remember, loadFeed() is asynchronous so this test wil require
          * the use of Jasmine's beforeEach and asynchronous done() function.
          */
-        var initialFeed = [];
         beforeEach(function (done) {
+            self = this;
             loadFeed(0, function () {
-                initialFeed = $('.feed .entry');
+                self.loadedFeed = $('.feed .entry');
                 done();
             });
         });
 
-        it('Initial entries are fetched by API call', function () {
-            expect(initialFeed.length).toBeGreaterThan(0);
+        it('are fetched by API call', function () {
+            expect(self.loadedFeed.length).toBeGreaterThan(0);
         });
+    });
 
-        /* TODO: Write a new test suite named "New Feed Selection"*/
-        describe('New Feed Selection', function () {
-            /* TODO: Write a test that ensures when a new feed is loaded
-             * by the loadFeed function that the content actually changes.
-             * Remember, loadFeed() is asynchronous.
-             */
-            var newFeed = [];
-            beforeEach(function (done) {
+    describe('New Feed Selection', function () {
+        var self;
+        /* A test that ensures when a new feed is loaded
+         * by the loadFeed function that the content actually changes.
+         * Remember, loadFeed() is asynchronous.
+         */
+        beforeEach(function (done) {
+            self = this;
+            loadFeed(0, function () {
+                self.initialFeed = $('.feed .entry');
                 loadFeed(1, function () {
-                    newFeed = $('.feed .entry');
+                    self.newFeed = $('.feed .entry');
                     done();
                 });
             });
-            it('New entries are fetched by API call', function () {
-                expect(newFeed.length).toBeGreaterThan(0);
-                expect(newFeed[0].innerHTML).not.toEqual(initialFeed[0].innerHTML);
-            });
-
         });
+        it('fetches new content of entries by API call', function () {
+            expect(self.newFeed.length).toBeGreaterThan(0);
+            expect(self.newFeed[0].innerHTML).not.toEqual(self.initialFeed[0].innerHTML);
+        });
+
     });
 }());
